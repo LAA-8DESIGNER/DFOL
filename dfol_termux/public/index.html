@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <title>DFOL — Privacy & Source Review</title>
+  <link rel="stylesheet" href="/style.css?v=8.0.0">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="brand-mark">D</div><div><strong>DFOL</strong><small>Privacy-safe code export</small></div></div>
+  <div class="status-wrap"><span id="healthDot" class="dot"></span><span id="healthText">Checking storage…</span><button id="aboutDesignerBtn" class="about-designer-btn" type="button" title="About the Designer" aria-haspopup="dialog" aria-controls="aboutDesignerModal"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c.6-3.5 3.1-5.3 7-5.3s6.4 1.8 7 5.3"></path></svg><span>About</span></button><button id="restartBtn" class="icon-btn" type="button" title="Start a new DFOL session" aria-label="Start a new DFOL session">⌂</button><button id="themeBtn" class="icon-btn theme-btn" type="button" title="Switch theme" aria-label="Switch dark or light theme">☀</button><button id="refreshBtn" class="icon-btn" title="Refresh" aria-label="Refresh storage">↻</button></div>
+</header>
+<main class="workspace">
+  <aside class="pane explorer-pane">
+    <div class="pane-head">
+      <div><h2 id="leftPaneTitle">File explorer</h2><p id="leftPaneSubtitle">Long-press a folder to scan</p></div>
+      <button id="upBtn" class="secondary small">↑ Up</button>
+    </div>
+    <div id="exportReviewSidebar" class="export-review-sidebar hidden">
+      <div class="export-review-intro"><b>Final export selection</b><small>A folder can appear in both lists when some findings are masked and others remain raw.</small></div>
+      <section class="export-list-section include-list-section">
+        <div class="export-list-heading"><b>INCLUDE IN EXPORT</b><span id="includeFolderCount">0</span></div>
+        <div id="includeFolderList" class="export-folder-list"><div class="empty">No unmasked findings.</div></div>
+      </section>
+      <section class="export-list-section masked-list-section">
+        <div class="export-list-heading"><b>NOT INCLUDED / MASKED</b><span id="maskedFolderCount">0</span></div>
+        <div id="maskedFolderList" class="export-folder-list"><div class="empty">No masked findings.</div></div>
+      </section>
+      <div class="export-review-foot"><small>Tap any folder to review all findings in it. Changes apply after Done.</small></div>
+    </div>
+    <div id="explorerContent">
+      <div class="pathbar"><span>PATH</span><code id="currentPath">/storage/emulated/0</code></div>
+      <div class="explorer-tools">
+        <button id="homeBtn" class="secondary small">Storage root</button>
+        <label class="toggle"><input id="hiddenToggle" type="checkbox"> Hidden</label>
+      </div>
+      <div id="fileList" class="file-list"><div class="empty">Loading storage…</div></div>
+      <div class="pane-foot"><span id="folderCount">—</span><span>Files cannot be opened</span></div>
+    </div>
+  </aside>
+  <section class="pane analysis-pane">
+    <div class="pane-head analysis-head">
+      <div><h2 id="analysisTitle">Scan & review</h2><p id="analysisSubtitle">Choose a folder on the left to begin.</p></div>
+      <span id="scanBadge" class="badge">READY</span>
+    </div>
+    <div id="treeReview" class="tree-review hidden">
+      <div class="tree-summary">
+        <div><h3>Folder tree & exclusions</h3><p>For source items, tick to exclude. With cache/generated enabled, untick a generated item to include that item raw in the ZIP instead of scanning it.</p></div>
+        <span id="treeCount" class="badge">Loading tree…</span>
+      </div>
+      <div class="selected-root"><span>SCAN ROOT</span><code id="treeRootPath"></code></div>
+      <label class="generated-toggle"><input id="includeGenerated" type="checkbox"><span><b>Include cache & generated files</b><small>Default OFF. A broad cross-language rule pack marks cache, dependency, build, test, IDE and OS artifacts. When ON, matching items can be scanned. Untick an item to skip scanning it but include it raw in the ZIP. Nothing is deleted.</small></span></label>
+      <div class="generated-legend"><span class="legend-chip source-chip">● RAW SOURCE</span><span class="legend-chip generated-chip">● CACHE / GENERATED</span><span class="legend-note">Amber items are always marked, even when included.</span></div>
+      <div class="tree-toolbar">
+        <button id="treeSelectAll" class="secondary small">Select all</button>
+        <button id="treeClear" class="secondary small">Clear exclusions</button>
+        <span id="excludeCount">0 excluded</span>
+      </div>
+      <div id="treeList" class="tree-list"><div class="empty">Loading folder tree…</div></div>
+      <div id="treeTruncated" class="scan-notes hidden">The tree was shortened for performance. Items not shown cannot be selected individually here.</div>
+      <div class="tree-footer">
+        <div class="path-confirm"><b>Selected root</b><code id="treeConfirmPath"></code><small>Check the full path before scanning to avoid selecting the wrong folder.</small></div>
+        <button id="beginScanBtn" class="primary">Confirm exclusions & scan</button>
+      </div>
+    </div>
+    <div id="emptyState" class="empty-state">
+      <div class="hero-icon">⌕</div><h3>Inspect before you export</h3>
+      <p>Long-press a folder to review its complete tree. Select anything to exclude before scanning for sensitive information.</p>
+      <div class="privacy-note"><span>●</span> No cloud upload. The server listens on 127.0.0.1 only.</div>
+    </div>
+    <div id="scanProgress" class="scan-progress hidden">
+      <div class="progress-line"><span id="progressLabel">Scanning…</span><strong id="progressPercent">0%</strong></div>
+      <div class="progress-track"><div id="progressBar"></div></div>
+      <div class="stats">
+        <div><strong id="filesScanned">0</strong><span>Files seen</span></div>
+        <div><strong id="readableFiles">0</strong><span>Text scanned</span></div>
+        <div><strong id="findingTotal">0</strong><span>Findings</span></div>
+        <div><strong id="skippedFiles">0</strong><span>Skipped</span></div>
+      </div>
+    </div>
+    <div id="reviewArea" class="review-area hidden">
+      <div class="section-title"><div><h3>Sensitive findings by folder</h3><p>All findings start checked. Checked = mask this value; unchecked = leave this sensitive value raw in the export. Folders stay collapsed until opened.</p></div><div class="inline-actions"><button id="selectHighBtn" class="secondary small">Mask high risk</button><button id="selectAllBtn" class="secondary small">Mask all</button><button id="selectNoneBtn" class="secondary small">Leave all raw</button></div></div>
+      <div id="folderSensitiveList" class="folder-sensitive-list"></div>
+      <div class="findings-head"><span>FINDING SELECTION</span><span id="selectedCount">0 masked</span></div>
+      <div class="scan-notes" id="scanNotes"></div>
+      <div class="section-title export-title"><div><h3>Export options</h3><p>Supported text files are exported; unchecked sensitive values remain raw.</p></div></div>
+      <div class="export-grid">
+        <label class="export-option"><input id="outCombined" type="checkbox" checked><span><b>One combined TXT</b><small>live.txt</small></span></label>
+        <label class="export-option"><input id="outIndividual" type="checkbox" checked><span><b>Individual TXT files</b><small>One dump per source file</small></span></label>
+        <label class="export-option"><input id="outCopy" type="checkbox"><span><b>Sanitized folder copy</b><small>Folder structure preserved; unsafe files excluded</small></span></label>
+        <label class="export-option"><input id="outZip" type="checkbox" checked><span><b>Create ZIP</b><small>Archive selected output types</small></span></label>
+      </div>
+      <label id="zipAllWrap" class="toggle zip-toggle"><input id="zipAll" type="checkbox" checked> Put all selected output types inside ZIP</label>
+      <label class="raw-export-option" id="rawExportOption"><input id="unmaskRawFiles" type="checkbox"><span><b>Export scanned source files unchanged (including detected sensitive data)</b><small>Copies the scanned text files without altering their contents. Requires the detailed warning, a 30-second safety hold, and a one-time Termux code with a 45-second validity window. Files excluded or skipped by the scanner are not added by this option.</small></span></label>
+      <div class="review-warning" id="unresolvedWarning"></div>
+      <label class="confirm-row"><input id="confirmUnresolved" type="checkbox"><span>I understand that high-risk findings remain unmasked and explicitly confirm export.</span></label>
+      <section class="export-name-box" aria-labelledby="exportNameTitle">
+        <label class="export-name-label" id="exportNameTitle" for="exportFolderName">Export folder name</label>
+        <input id="exportFolderName" type="text" maxlength="100" placeholder="Enter a custom folder name" autocomplete="off" spellcheck="false">
+        <label class="toggle export-time-toggle"><input id="useDeviceDateTime" type="checkbox" checked> Use phone's system date & time automatically</label>
+        <small id="exportNamePreview">Default: /storage/emulated/0/dump/YYYY-MM-DD_HH-MM-SS (phone local time)</small>
+        <small id="exportNameAvailability" class="export-name-status checking" role="status" aria-live="polite">Checking export folder name…</small>
+        <small class="export-name-legend">Green = name is available. Red = name already exists; choose another.</small>
+      </section>
+      <div id="exportPerformanceNotice" class="export-performance-notice hidden" role="status" aria-live="polite"><b>Large export in progress</b><span>No DFOL file-count/file-size cap is configured. Processing time and completion depend on your device resources, available storage and operating environment. Keep Termux available while it runs.</span></div>
+      <div class="export-actions"><button id="exportBtn" class="primary">Sanitize & export</button><span id="exportStatus" role="status"></span></div>
+
+    </div>
+    <section id="exportResultPage" class="export-result-page hidden">
+      <div class="result-page-icon">✓</div>
+      <h3>Export completed</h3>
+      <p>Review the output location, selected files and audit summary below. Treat any raw export as sensitive data.</p>
+      <div id="exportResult" class="export-result hidden"></div>
+      <button id="resultCompleteBtn" class="primary result-complete-btn" type="button">Complete · Start again</button>
+    </section>
+  </section>
+</main>
+<nav id="workflowNav" class="workflow-nav" aria-label="Workflow navigation">
+  <button id="workflowBack" class="secondary" type="button" disabled>← Back</button>
+  <div class="workflow-nav-copy"><b id="workflowStepLabel">STEP 1 OF 4 · Choose folder</b><small id="workflowNavHint">Long-press a folder on the left, or select a folder and continue.</small></div>
+  <button id="workflowNext" class="primary" type="button" disabled>Next →</button>
+</nav>
+<div id="aboutDesignerModal" class="about-modal hidden" role="dialog" aria-modal="true" aria-labelledby="aboutDesignerTitle" aria-describedby="aboutDesignerIntro">
+  <section class="about-card">
+    <header class="about-header">
+      <div><span class="about-eyebrow">DFOL · CREATOR PROFILE</span><h2 id="aboutDesignerTitle">About the Designer</h2><p>Personal vision, project details and direct profile links.</p></div>
+      <button id="closeAboutDesigner" class="icon-btn about-close" type="button" aria-label="Close About the Designer">×</button>
+    </header>
+    <div class="about-content">
+      <section class="about-identity">
+        <img class="about-avatar" src="/assets/prakashh-profile.jpg" alt="PRAKASHH profile picture" width="132" height="132">
+        <div class="about-identity-copy"><span class="about-kicker">DESIGNER</span><h3>PRAKASHH</h3><a class="about-handle" href="https://github.com/LAA-8DESIGNER" target="_blank" rel="noopener noreferrer" aria-label="Open LAA-8DESIGNER GitHub profile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.55.1.76-.24.76-.53v-2.04c-3.1.67-3.75-1.31-3.75-1.31-.5-1.28-1.24-1.62-1.24-1.62-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 .1.9 2.01 3.53 1.51.1-.72.39-1.22.7-1.5-2.47-.28-5.07-1.23-5.07-5.5 0-1.22.44-2.21 1.16-2.99-.12-.29-.5-1.42.11-2.95 0 0 .95-.3 3.06 1.14a10.65 10.65 0 0 1 5.57 0c2.11-1.44 3.06-1.14 3.06-1.14.61 1.53.23 2.66.11 2.95.72.78 1.16 1.77 1.16 2.99 0 4.28-2.61 5.21-5.09 5.49.4.35.75 1.03.75 2.08V22c0 .29.2.64.77.53A11.1 11.1 0 0 0 12 .9Z"></path></svg><span>@LAA-8DESIGNER</span><span class="about-external">↗</span></a><p class="about-tagline">“I Design What Should Exist.”</p></div>
+      </section>
+      <section class="about-bio"><p id="aboutDesignerIntro">I create experimental websites, applications and tools that do not exist yet—but could make the world's workflows faster.</p></section>
+      <section class="about-links" aria-label="Direct social and email links">
+        <a class="about-link about-youtube" href="https://youtube.com/@laa8_designer?si=kLPtgy1XvOfegnrV" target="_blank" rel="noopener noreferrer"><span class="social-icon youtube-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"></path></svg></span><span class="about-link-copy"><b>YouTube</b><small>LAA8 Designer · @laa8_designer</small></span><span class="about-external">↗</span></a>
+        <a class="about-link about-instagram" href="https://www.instagram.com/praka.shh0001?exln=MWgyN3F3Mnl1YXNiZw==" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.7" cy="6.4" r="1.1" class="instagram-dot"></circle></svg></span><span class="about-link-copy"><b>Instagram</b><small>@praka.shh0001</small></span><span class="about-external">↗</span></a>
+        <a class="about-link about-email" href="mailto:prakashh93168@gmail.com"><span class="social-icon email-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"></rect><path d="m3.5 6 8.5 6.5L20.5 6"></path></svg></span><span class="about-link-copy"><b>Email</b><small>prakashh93168@gmail.com</small></span><span class="about-external">↗</span></a>
+      </section>
+      <section class="about-vision">
+        <span class="about-kicker">THE IDEA BEHIND THE PROJECT</span>
+        <h3>Why I Created DFOL</h3>
+        <p class="about-definition"><b>DFOL = Dump Folder — Poore Folder Ka Dump.</b></p>
+        <p>Before designing DFOL, I sometimes found it difficult to bring a whole server or software project into one readable document. The work is spread across many folders and files, and collecting it all can be slow and frustrating. I experienced this problem myself.</p>
+        <p>I wanted to give the world a rough design proposal for a simpler workflow: open a folder in a File Manager, click its three-dot menu, choose DFOL, and export the whole folder into one structured TXT document containing its paths, structure and supported file contents.</p>
+        <p>This is a proposed design, not a claim that the final industry solution is complete. Other developers and companies can improve it, update it and build it at a larger scale. Even in the age of AI and the internet, poor workflows and inadequate tools can make people slower and more frustrated. I want to contribute an idea that helps people work faster.</p>
+        <p class="about-vision-last">The aim is simple: make it easier to bring a complete project together in one place, understand it and share it when needed.</p>
+      </section>
+      <section class="about-signature-section">
+        <div><span class="about-kicker">DESIGNER'S SIGNATURE</span><p>Personal design mark · not a legal verification method</p></div>
+        <div class="signature-paper"><img src="/assets/prakashh-signature.png" alt="PRAKASHH handwritten signature" loading="eager"></div>
+        <div class="about-stamp"><span>DFOL</span><span>DESIGNED BY PRAKASHH</span><span>GITHUB · LAA-8DESIGNER</span></div>
+      </section>
+      <section class="about-reuse"><span class="about-kicker">OPEN REUSE</span><p>You may use, modify, integrate, redistribute and build on DFOL in your own apps or software under the included Unlicense. Giving credit is optional. If you would like to, you may mention “Inspired by LAA-8DESIGNER / PRAKASHH” as a courtesy. No credit is required by this project’s release terms.</p></section>
+    </div>
+    <footer class="about-footer"><span>DFOL · Dump Folder</span><a href="https://github.com/LAA-8DESIGNER" target="_blank" rel="noopener noreferrer">GitHub profile ↗</a></footer>
+  </section>
+</div>
+
+<div id="securityModal" class="security-modal hidden" role="dialog" aria-modal="true" aria-labelledby="securityModalTitle">
+  <div class="security-modal-card">
+    <div class="security-modal-header"><div><h3 id="securityModalTitle">Sensitive-data handling confirmation</h3><p id="securityModalSubtitle">Read before proceeding.</p></div><button id="closeSecurityModal" class="icon-btn" type="button" aria-label="Cancel confirmation">×</button></div>
+    <div id="securityModalContent" class="security-modal-content"></div>
+    <div id="securityModalActions" class="security-modal-actions"></div>
+  </div>
+</div>
+<div id="folderDetailModal" class="folder-detail-modal hidden" role="dialog" aria-modal="true" aria-labelledby="folderDetailTitle">
+  <div class="folder-detail-card">
+    <div class="folder-detail-header"><div><h3 id="folderDetailTitle">Folder findings</h3><p id="folderDetailSubtitle">Review sensitive findings</p></div><button id="closeFolderDetail" class="icon-btn" type="button" aria-label="Close folder details">×</button></div>
+    <div id="folderDetailList" class="folder-detail-list"></div>
+    <div class="folder-detail-footer"><small>Checked items are masked. Unchecked items remain raw in the export.</small><button id="doneFolderDetail" class="primary" type="button">Done</button></div>
+  </div>
+</div>
+<div id="toast" class="toast" role="status"></div>
+<script src="/app.js?v=8.0.0" defer></script>
+</body>
+</html>
