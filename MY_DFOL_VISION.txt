@@ -1,0 +1,49 @@
+DFOL — THE VISION BEHIND THE DESIGN
+===================================
+
+DFOL = Dump Folder — Poore Folder Ka Dump.
+
+DESIGNED BY: PRAKASHH
+GITHUB: LAA-8DESIGNER
+PROFILE: https://github.com/LAA-8DESIGNER
+YOUTUBE: LAA8 Designer — @laa8_designer
+https://youtube.com/@laa8_designer?si=kLPtgy1XvOfegnrV
+INSTAGRAM: @praka.shh0001
+https://www.instagram.com/praka.shh0001?exln=MWgyN3F3Mnl1YXNiZw==
+EMAIL: prakashh93168@gmail.com
+
+WHY I CREATED DFOL
+------------------
+I designed DFOL after experiencing a problem in my own coding workflow. When an entire server or software project is spread across many folders and files, collecting the whole project into one readable document can be difficult, time-consuming and frustrating. This was something I faced before designing DFOL.
+
+THE IDEA I WANT TO SHARE
+------------------------
+I want to give the world a rough design proposal for a simpler File Manager feature:
+
+1. The user opens a folder in a File Manager.
+2. The user clicks the three-dot menu.
+3. The user chooses DFOL.
+4. The whole selected folder is exported into one structured TXT document containing the folder structure, file paths and supported file contents.
+
+This is my rough design proposal, not a claim that the final industry solution is already complete. Once this design is available, developers, File Manager designers and software companies can update it, improve it and build it at a larger scale.
+
+THE PROBLEM I WANT TO HELP WITH
+-------------------------------
+Even in the age of AI and the internet, people can still lose time and become frustrated because of poor design, weak workflows and tools that make routine tasks harder than they need to be. I want to contribute a design that can make collecting and sharing project context easier and help people move forward faster.
+
+WHAT DFOL MEANS TO ME
+---------------------
+DFOL is an attempt to turn a problem I personally experienced into a reusable workflow idea. The goal is to make it easier to bring a complete project together in one place so that people can read it, understand it, review it and share it when needed.
+
+OPEN USE, MODIFICATION AND CREDIT
+---------------------------------
+I am making this project available for people to use, change, integrate into their own applications or software, redistribute and build upon. Programmers of any experience level are welcome to adapt it for their own work. No one has to ask me for permission or provide credit under the included Unlicense.
+
+If someone would like to mention where the idea came from, optional courtesy wording could be “Inspired by LAA-8DESIGNER / PRAKASHH.” This credit is a choice, not a requirement. People are free to make their own changes and use the project in their own way.
+
+I am sharing the design so others can take it further if they find it useful.
+
+
+PRAKASHH
+DFOL — Dump Folder
+GitHub: LAA-8DESIGNER

@@ -1,0 +1,332 @@
+DFOL COMPLETE DOCUMENTATION — VERSION 7.0.0
+============================================
+
+Project name: DFOL
+Full form: Dump Folder — Poore Folder Ka Dump
+Designer / public identity: PRAKASHH
+GitHub: https://github.com/LAA-8DESIGNER
+YouTube: https://youtube.com/@laa8_designer?si=kLPtgy1XvOfegnrV
+Instagram: https://www.instagram.com/praka.shh0001?exln=MWgyN3F3Mnl1YXNiZw==
+Email: prakashh93168@gmail.com
+License: The Unlicense (see LICENSE)
+Version: 7.0.0
+
+DOCUMENT PURPOSE
+----------------
+This is the user/developer reference for the delivered DFOL project. It describes the source package, architecture, user journey, output files, security controls, limitations and setup. It is not a claim that heuristic secret detection is perfect or that every Android device has been field-tested.
+
+1. WHAT DFOL IS
+---------------
+DFOL is a local HTML/Node.js file browser and source-review/export tool designed for Android Termux. It lets a user browse shared storage, review a project tree, optionally exclude paths, scan supported text files for configured patterns, choose which detected values to mask, and export selected outputs. It also provides a Tree-only export, a combined live.txt document, individual TXT documents, a sanitized project copy and ZIP output.
+
+The application is intended to run on the local device. The HTTP server binds to 127.0.0.1 by default; it is not designed to be exposed to a LAN or the public internet.
+
+2. DFOL'S DESIGN VISION
+-----------------------
+The designer experienced difficulty collecting an entire server/project from many folders into one readable document. The proposal is to let a future File Manager user click a folder's three-dot menu, choose DFOL, and export the full folder into one structured TXT snapshot. The project is a rough design/prototype that other people may refine, extend and integrate into their own tools.
+
+3. SUPPORTED ENVIRONMENT
+------------------------
+Primary target: Android with Termux, Node.js version 18 or newer, shared-storage permission and the Termux zip command for ZIP exports.
+
+The current backend uses fixed Android paths:
+- Shared-storage root: /storage/emulated/0
+- Export root: /storage/emulated/0/dump
+- Server address: 127.0.0.1
+- Default port: 3001 (PORT environment variable may override it)
+
+This version is Termux/Android oriented. Do not describe it as cross-platform desktop software without changing and testing the hard-coded path and platform assumptions.
+
+4. REPOSITORY FILE MAP
+----------------------
+README.md
+  Short introduction, current install/run steps, safety notes and quick-start information.
+
+LICENSE
+  The Unlicense text. It records the author's permission for broad reuse, modification and redistribution.
+
+quickstart.sh
+  One-command launcher for a clone of the public DFOL repository in Termux. It checks/installs Node.js and zip through Termux package tools as needed, requests shared-storage setup when the storage link is missing, then starts the local server in the terminal.
+
+DFOL_COMPLETE_DOCUMENTATION.txt
+  This document.
+
+MY_DFOL_VISION.txt
+  The designer's own stated experience and intent in letter form.
+
+dfol_termux/server.js
+  Local HTTP server, file browser APIs, traversal safety rules, scanner, pattern matching, masking/export pipeline, Tree.txt generation, audit report, ZIP creation, and ephemeral high-risk raw-export authorization.
+
+dfol_termux/generated_filters.js
+  Offline heuristic catalogue for common generated/cache/build/dependency/test/IDE/VCS/OS paths and files.
+
+dfol_termux/GENERATED_FILTERS.md
+  Human-readable explanation of the filter catalogue and limitations.
+
+dfol_termux/package.json
+  Node metadata and test command. Runtime logic uses Node built-ins and the Termux zip executable; it has no project node_modules requirement.
+
+dfol_termux/install.sh
+  Optional file-copy installer to a separate target directory; it avoids overwriting files that already exist. Run a clean install into a new target directory if you want a complete update.
+
+dfol_termux/public/index.html
+  Page structure and dialogs, including About the Designer.
+
+dfol_termux/public/app.js
+  Client-side workflow, browser state restoration, folder browser interactions, UI updates, scan review, masking choices, export actions and About modal actions.
+
+dfol_termux/public/style.css
+  Responsive dark/light styling and About/profile presentation styles.
+
+dfol_termux/public/assets/prakashh-profile.jpg
+  Locally served profile photo supplied by PRAKASHH; metadata removed and resized for use in the app.
+
+dfol_termux/public/assets/prakashh-signature.png
+  Cleaned display image made from the designer's supplied handwritten signature photo. It is a presentation mark only, not a legal or identity-verification mechanism.
+
+dfol_termux/tests/*.test.js
+  Automated tests for export naming, generated filters and security workflow invariants.
+
+5. STARTING DFOL
+----------------
+Recommended after the repository is public and named DFOL:
+  pkg install git -y && git clone https://github.com/LAA-8DESIGNER/DFOL.git && cd DFOL && bash quickstart.sh
+
+This exact command requires the repository to exist publicly at that URL and the user to be running Termux. Until PRAKASHH creates/uploads that public repository, the clone URL is a planned target, not a live downloadable guarantee.
+
+Manual start after extracting/cloning:
+  cd DFOL/dfol_termux
+  pkg install nodejs zip
+  termux-setup-storage
+  node server.js
+
+Open Android Chrome:
+  http://127.0.0.1:3001
+
+Stop using Ctrl+C in the same Termux terminal. Run the server directly in an interactive terminal; the high-risk raw export flow temporarily displays a one-time code there. Do not hide, background or expose that terminal/session when using that flow.
+
+If port 3001 is occupied, stop the other server first or use PORT=3002 node server.js temporarily. The web page/API origin then needs to match the selected port.
+
+6. FIRST RUN AND PERMISSIONS
+----------------------------
+- Install or update Termux packages using Termux's package manager.
+- Run termux-setup-storage and approve Android permission when requested.
+- Start server.js from Termux, not an unrelated Node environment.
+- Open the localhost URL in the browser on the same device.
+- If the UI reports storage permission unavailable, verify Android permissions and re-run termux-setup-storage.
+- Keep the server listening only on loopback. The server is intentionally configured for HOST=127.0.0.1.
+
+7. BROWSING AND TREE REVIEW
+---------------------------
+The left pane browses folders beneath /storage/emulated/0. Tapping a directory opens it. Long-pressing a folder opens the export-choice screen:
+- EXPORT TREE: creates a text tree map for that folder, with an optional ZIP that contains Tree.txt.
+- EXPORT CODE: continues into exclusion review and the source scanner.
+
+The tree walker sorts folders before files and then sorts names. It marks symbolic links instead of recursively following them. Version 8.0 removes the configured node-count and directory-depth cutoffs; traversal and tree-text rendering use iterative stacks rather than recursive calls. Tree exports contain names/paths, not the source file contents. Very large trees still require memory, storage and processing time on the device.
+
+DFOL's own /storage/emulated/0/dump output is protected from being recursively scanned. Trash/system metadata paths are skipped. The code does not delete source files.
+
+8. EXCLUSIONS AND GENERATED/CACHE FILTERING
+-------------------------------------------
+Before scanning, the tree review lets users exclude normal source paths. A global “Include cache & generated files” control defaults OFF. With it off, matching generated/cache paths are skipped from traversal. With it on, matches can appear in the tree and pass through normal scanning/file-type/size checks. Individually unticked generated items can be marked as explicit raw overrides and copied byte-for-byte into selected ZIP/folder-copy output. That is a sensitive raw-data action: do not assume an artifact is safe just because it is generated.
+
+The filter catalogue includes named categories such as CACHE, DEPENDENCY, BUILD, TEST, ML/DATA, IDE, VCS META, OS and GENERATED. Examples include __pycache__, .pyc, node_modules, .npm, .gradle caches, common framework build directories, coverage reports, .DS_Store, Thumbs.db, tool-specific caches and compiled artifacts.
+
+Important limitations:
+- The catalogue is heuristic, not complete. Newly released tools and custom generators may have patterns it does not know.
+- Generic folder names like build, generated, env, bin, out, vendor, logs or site can contain legitimate source or data. Review the tree and tooltip; use the global control to include paths when appropriate.
+- The generated-file filter does not delete any source content. It only affects the candidate scan/export flow.
+- A raw generated override deliberately bypasses scan/redaction for that path and may include binary data.
+
+Use GET /api/filters to read the loaded filter-catalog summary.
+
+9. SCAN SCOPE AND LIMITS
+------------------------
+Version 8.0 imposes no fixed DFOL file-count ceiling and no fixed DFOL source-file-size ceiling. It also removes the fixed request-body byte ceiling. The server recognizes configured source/text extensions and a few conventional extensionless names. Binary files, unknown extensions, credential-like filenames, private key files and database/data-dump extensions are still excluded from content scanning/export by default. No fixed ceiling does not mean literal infinite capacity: available RAM, storage, OS/filesystem, browser, Node.js and ZIP implementation remain physical/runtime constraints.
+
+Supported text-file extensions and names are enumerated in server.js (TEXT_EXTS). Binary extensions, sensitive filename sets and sensitive data file extensions are also explicit in that source. The scanner does not OCR images, decrypt archives, unpack compressed files to search their contents or inspect arbitrary binary payloads.
+
+10. CONFIGURED DETECTION CATEGORIES
+-----------------------------------
+Configured pattern categories include:
+- API/service-key token shapes, including several common provider formats.
+- PEM/SSH-style private-key markers.
+- Values assigned to password, client_secret, access_token, api_key and similar names.
+- Database connection strings for common protocols.
+- Bearer/authorization token-like values.
+- Certain webhook URLs with token/secret/key query parameters.
+- Email addresses.
+- Phone-like numeric values.
+
+Matches carry a path, line, category, severity, confidence, snippet and selection state. High-risk categories are selected for masking by default. Email and phone-like patterns are lower severity and may produce false positives.
+
+Detection is pattern-based. False positives and false negatives are possible; a secret not matching a configured pattern may pass through. Never treat a clean scan or clean audit report as proof that a file contains no secrets.
+
+11. MASKING SEMANTICS
+---------------------
+In sensitive findings review:
+- Checked = the detected finding is selected to be masked in the normal export.
+- Unchecked = that detected value remains unmasked in the normal export.
+- Folder rows represent aggregate selection state for findings below that folder.
+- Review the “Include in export” and “Not included / masked” side lists to understand which folders have unmasked or masked findings.
+- High-risk findings remaining unmasked require explicit confirmation for normal exports.
+
+Masking may change code literals, examples, comments, tests or syntax. Always compare the result with the original and test any code that will be reused.
+
+12. HIGH-RISK UNCHANGED-SOURCE EXPORT
+-------------------------------------
+The separate “Export scanned source files unchanged” option bypasses normal redaction for supported scanned text files and intentionally can include sensitive values. It requires the dedicated warning/consent path and a one-time authorization code shown in the visible interactive Termux terminal. The code is 256 bits from Node crypto.randomBytes, expires after 45 seconds, is one-use with attempt limits, is held on the server as a digest, is not returned to the browser and is not written to an application file or localStorage. The terminal display is cleared on expiry/cancellation/success where supported.
+
+Keep the terminal visible and do not share the authorization code. The raw export audit is informational because the user explicitly authorized unchanged source. The resulting output may contain real credentials, private data and tokens; treat it as sensitive.
+
+13. EXPORT FORMATS AND OUTPUT STRUCTURE
+--------------------------------------
+The main output root is /storage/emulated/0/dump/<folder-name>/.
+
+Available outputs:
+- live.txt: a combined text snapshot with path headers and supported source content. The exact canonical Tree.txt text is appended at the end when live.txt exists.
+- individual/: one TXT file per supported source file.
+- sanitized_project/: a text-focused copy preserving source folder structure, with selected redaction applied; this is not a complete byte-for-byte backup.
+- DFOL_export.zip: optional ZIP of selected output types, with the sibling canonical Tree.txt copied inside unchanged.
+- Tree.txt: directory/file tree map of the export folder.
+- DFOL_audit_report.json: export audit summary and source/scanning counts.
+- DFOL_Tree.zip: optional ZIP generated by the tree-only workflow and containing the Tree.txt map.
+
+The outer Tree.txt is generated once for the normal export. When ZIP creation is selected, that same Tree.txt file is added unchanged; no ZIP-specific artificial manifest is meant to replace it. live.txt receives the same tree text appended after the combined file contents.
+
+15. EXPORT NAMES AND FRESH WORKFLOW
+-----------------------------------
+Automatic folder naming uses device-local date/time: YYYY-MM-DD_HH-MM-SS. A custom name may be entered when automatic naming is unchecked. Unsafe path characters are normalized to underscores; empty names are rejected. Duplicate names are rejected instead of being silently changed to _2/_3. The interface checks availability and the server rechecks at creation time to handle a race condition.
+
+The manual export-name field is deliberately not persisted/restored. A previous name is not filled in after a new page load or completed export. However, current workflow state is stored in browser localStorage so that normal page refresh can restore the active scan/export stage while the Node server remains running. This is session recovery state, not an application-generated cache file. Pressing Home/Complete intentionally starts a new session; going Back or refreshing should not automatically clear the workflow.
+
+16. CACHE, GENERATED FILES AND CLEAN DISTRIBUTION
+------------------------------------------------
+The distributed source package should not contain old export output, temporary test output, node_modules, coverage output, .cache directories, __pycache__, .pyc, .DS_Store, logs or other accidental build/runtime leftovers. The release folder is checked for these before packaging.
+
+The app does not need npm install and does not require a node_modules folder. It uses Node built-ins plus Termux's zip command. Normal server launch uses memory for active scan jobs, export tasks and authorization challenges; source files are not edited. The browser uses localStorage for workflow recovery and theme preference because the user specifically needs Back/refresh navigation to resume rather than restart.
+
+Intentional output generation still exists: when a user explicitly exports, DFOL creates output folders/files such as Tree.txt, live.txt, individual TXT documents, sanitized_project, ZIP and an audit report. These are the purpose of the application and are not cache files. Removing those exports would defeat DFOL's feature. System package managers may maintain caches outside the repository when installing Node/zip; these are not files generated inside the DFOL project.
+
+HTTP responses for the UI and API use Cache-Control: no-store. This asks compliant browsers not to cache those responses, but does not erase browser localStorage or operating-system package caches.
+
+17. ABOUT THE DESIGNER PAGE
+---------------------------
+The top bar provides About. Opening it displays the user-provided profile photo, public name PRAKASHH, GitHub handle LAA-8DESIGNER, the designer's stated tagline, direct YouTube and Instagram links, public email address, the DFOL vision statement and the provided handwritten signature. The button is presentation-only: it does not reset the scan or export workflow. Clicking the social links opens the selected destination; clicking Email opens the device's configured mail app.
+
+All About images are local files under dfol_termux/public/assets and are served by the same localhost server. No third-party image host, font service or analytics library is needed for this page.
+
+18. HTTP ROUTE REFERENCE
+------------------------
+GET /
+  Returns the app HTML page.
+GET /app.js
+  Returns front-end workflow logic.
+GET /style.css
+  Returns styles.
+GET /assets/prakashh-profile.jpg
+  Returns the supplied profile picture asset.
+GET /assets/prakashh-signature.png
+  Returns the cleaned signature-display asset.
+GET /api/health
+  Returns host/port/storage-access/output-root/filter version health information.
+GET /api/filters
+  Returns generated-filter catalogue counts/categories/disclaimer.
+GET /api/list?path=<shared-storage-path>
+  Lists folders/files under shared storage; files are not opened directly in the browser.
+GET /api/tree?path=<folder-path>
+  Returns a bounded tree map and metadata.
+POST /api/tree-export
+  Generates a Tree.txt export and optional Tree ZIP.
+POST /api/scan
+  Starts a scan with exclusions, generated filter toggle, raw generated overrides and masking mode.
+GET /api/scan/<job-id>
+  Returns scan status/findings/file statuses for a current in-memory job.
+POST /api/unmask/otp/request
+  Starts the high-risk raw-export authorization flow; requires an interactive TTY.
+POST /api/unmask/otp/cancel
+  Cancels the temporary authorization challenge.
+POST /api/unmask/otp/verify
+  Verifies a submitted one-time code.
+POST /api/check-export-name
+  Checks if the selected output folder name already exists.
+POST /api/export
+  Starts a normal/raw export task after checking workflow requirements.
+GET /api/export/<task-id>
+  Returns current task status from memory.
+GET /api/download?path=<exported-file>
+  Downloads files only from DFOL's output root.
+
+Unknown routes return 404. JSON responses use no-store and nosniff headers.
+
+19. PRIVACY / SECURITY NOTES
+----------------------------
+- Keep the server on 127.0.0.1; do not forward/expose its port.
+- The app can list/read supported text files in shared storage once Android/Termux permission allows it.
+- Do not add sensitive personal files, credentials, debug dumps or private keys to a public GitHub repository.
+- Do not confuse source-code cleanliness with export-content safety. Each user's exported project needs its own review.
+- Do not share raw exports without reviewing them. The app intentionally permits certain high-risk raw actions only after additional steps, but user authorization is not proof the resulting copy is safe.
+- An audit checks supported token/private-key patterns; it cannot prove the absence of all sensitive data.
+- The app does not claim to be a malware scanner, antivirus, DLP guarantee or formal security certification.
+
+20. TESTS AND RELEASE CHECKLIST
+-------------------------------
+Tests:
+  cd dfol_termux
+  node --check server.js
+  node --check public/app.js
+  npm test
+
+Release checks also verify:
+- The ZIP can be opened and passes ZIP integrity.
+- No unintended caches/build/temp artifacts are included in the release directory.
+- The About asset routes return local image files with correct content types.
+- GitHub, YouTube, Instagram and mailto links in About point to the user's stated destinations.
+- Browser refresh restores the current session when server memory is still alive.
+- Back/Next/Home actions retain their intended meaning.
+- Duplicate names do not silently create suffixed folders.
+- Tree.txt outside the ZIP and its copy inside DFOL_export.zip are identical for regular exports.
+
+Syntax/unit tests are not a substitute for live Android device testing. The final maintainer should perform at least one complete masked export, one Tree-only export, one duplicate-name attempt, a refresh-recovery check and a safe raw-export test with synthetic dummy data before calling a release fully field-verified.
+
+21. TROUBLESHOOTING
+-------------------
+Storage access not ready:
+  termux-setup-storage
+Approve the Android permission if prompted, then restart node server.js.
+
+Port already in use:
+  ss -ltnp | grep 3001
+Stop the older process or use a different PORT consistently.
+
+ZIP command missing:
+  pkg install zip
+
+Node missing:
+  pkg install nodejs
+
+Page is stale:
+The server sends no-store headers and assets use versioned query parameters. Restart the server and do a browser reload. Browser localStorage remains to restore the active workflow unless Home/Complete starts a new session.
+
+Raw-export OTP unavailable:
+Run node server.js directly in an interactive Termux terminal. The code is not returned to the browser or written to disk.
+
+22. REUSE AND LICENSE
+---------------------
+The project is released under The Unlicense, included in LICENSE. The intent is that anyone may use, copy, modify, integrate, distribute and build upon this work without a required attribution. Optional courtesy credit “Inspired by LAA-8DESIGNER / PRAKASHH” is welcome only if the user chooses. Review LICENSE for its text and disclaimer.
+
+23. AUTHOR'S STATED VISION
+--------------------------
+The vision is not to claim ownership of the world's workflow or prevent changes. It is to contribute a rough design: a File Manager feature that can put a complete folder/project into one structured text snapshot. Others are explicitly welcome to adopt it, change it, extend it and use it in their own products. Optional credit is the designer's requested courtesy, not a condition.
+
+END OF DOCUMENTATION
+====================
+
+
+19. VERSION 8.0 — NO FIXED FILE COUNT/SIZE CAPS
+------------------------------------------------
+DFOL v8.0 removes application-enforced maximums for discovered scan file count, source-file byte size, JSON request-body length, tree node count and tree depth. The tree traversal, tree text generation, output tree traversal, raw generated override copying, and export audit directory walk use iterative traversal in place of configured file-count/depth cutoffs.
+
+Before starting export, the interface displays a performance notice. While an export is running, a persistent status notice reminds the user that large jobs can require substantial time, memory, storage and compression work. The notice states that duration and completion depend on device resources and the operating environment rather than an artificial DFOL count/size cap.
+
+Physical/runtime limits remain: finite RAM/storage, Android process management, available disk space, path/filesystem limits, Node.js/browser memory, and ZIP command capabilities. A project containing an astronomical number of files cannot be promised to complete on any finite device; this version removes DFOL-configured count/size cutoffs rather than guaranteeing impossible infinite resources. Unsupported file types, binary files, explicit sensitive filename exclusions, unreadable files and heuristic security limitations remain unchanged.

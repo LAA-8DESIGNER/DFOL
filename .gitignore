@@ -1,0 +1,40 @@
+# Repository metadata and accidental local data
+.git/
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Runtime/build/cache artifacts if a contributor tests DFOL locally
+node_modules/
+**/node_modules/
+__pycache__/
+*.py[cod]
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.npm/
+.pnpm-store/
+.gradle/
+.vite/
+.next/
+.turbo/
+coverage/
+dist/
+build/
+target/
+
+# User export output should never be checked into source
+/dump/
+/DFOL_export.zip
+/DFOL_audit_report.json

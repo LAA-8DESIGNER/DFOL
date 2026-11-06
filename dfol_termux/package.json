@@ -1,0 +1,15 @@
+{
+  "name": "dfol-privacy-dumper",
+  "version": "8.0.0",
+  "private": false,
+  "description": "DFOL (Dump Folder): local Termux project tree, source review, sensitive-pattern masking and export tool with no application-level file-count/file-size ceiling",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "Unlicense"
+}
